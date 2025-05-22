@@ -79,10 +79,51 @@ getFoodDetails = (fdcId, nutrientNumbersArray) ->
 getApiKey = ->
   return apiKey
 
+# Function to get a list of foods (paginated)
+# Options can include: pageSize, pageNumber, sortBy, sortOrder
+getFoodList = (options = {}) ->
+  return new Promise (resolve, reject) ->
+    unless apiKey
+      console.error "API key not set. Call setApiKey(key) first."
+      return reject("API key not set.")
+
+    # Default options
+    pageSize = options.pageSize or 20 # Default to 20 items per page
+    pageNumber = options.pageNumber or 1 # Default to page 1
+    
+    url = "https://api.nal.usda.gov/fdc/v1/foods/list?api_key=#{apiKey}&pageSize=#{pageSize}&pageNumber=#{pageNumber}"
+
+    # Append other options if provided
+    if options.sortBy
+      url += "&sortBy=#{encodeURIComponent(options.sortBy)}"
+    if options.sortOrder
+      url += "&sortOrder=#{encodeURIComponent(options.sortOrder)}"
+      
+    console.log "Fetching food list with options: #{JSON.stringify(options)} at URL: #{url}"
+
+    request = new Utils.HTTPRequest
+      url: url
+      method: "GET"
+
+    request.on "success", (dataString) ->
+      try
+        # The /foods/list endpoint returns an array directly
+        parsedData = JSON.parse(dataString)
+        resolve(parsedData or []) # Resolve with the array of AbridgedFoodItem or empty if undefined/null
+      catch e
+        console.error "Error parsing JSON response for getFoodList:", e
+        console.error "Raw response string:", dataString
+        reject("Error parsing JSON response: #{e.message}")
+
+    request.on "error", (error) ->
+      console.error "Error fetching food list:", error
+      reject(error)
+
 # Export functions to be used by other modules
 module.exports = {
   setApiKey,
   getApiKey, # Added for testing
   searchFoods,
-  getFoodDetails
+  getFoodDetails,
+  getFoodList # Added new function
 }
