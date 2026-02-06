@@ -1,0 +1,14 @@
+{
+  "name": "nutrition-up",
+  "version": "1.0.0",
+  "description": "Framer project converted to TypeScript",
+  "scripts": {
+    "build": "webpack"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "webpack": "^5.0.0",
+    "webpack-cli": "^5.0.0",
+    "ts-loader": "^9.0.0"
+  }
+}
